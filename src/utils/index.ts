@@ -1,0 +1,1 @@
+export { getEnvsByServer } from './getEnvsByServer'
