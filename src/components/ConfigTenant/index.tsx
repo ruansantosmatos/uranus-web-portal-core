@@ -1,0 +1,1 @@
+export { ConfigTenant } from './ConfigTenant'

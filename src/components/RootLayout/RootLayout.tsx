@@ -1,6 +1,6 @@
 'use client'
-import '@projectengine-team/hefesto/dist/hefesto.css' 
-import '../../styles/./globals.css' 
+import '@projectengine-team/hefesto/dist/hefesto.css'
+import '../../styles/./globals.css'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { LayoutGrid, LogOut } from 'lucide-react'

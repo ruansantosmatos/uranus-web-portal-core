@@ -1,16 +1,13 @@
-import { ConfigTenantProvider } from "@/components/ConfigTenantProvider";
-import { RootLayout } from "@/components/RootLayout";
+import { RootLayout } from '@/components/RootLayout'
+import { ConfigTenant } from '@/components/ConfigTenant'
 
 export default async function Layout({ children }: Readonly<{ children: React.ReactNode }>) {
-
   return (
-    <html lang="en">
+    <html lang="pt-br">
       <body>
-        <ConfigTenantProvider>
-          <RootLayout>
-            {children}
-          </RootLayout>
-        </ConfigTenantProvider>
+        <ConfigTenant>
+          <RootLayout>{children}</RootLayout>
+        </ConfigTenant>
       </body>
     </html>
   )

@@ -1,1 +1,0 @@
-export { ConfigTenantProvider } from './ConfigTenantProvider'
