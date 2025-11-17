@@ -1,5 +1,5 @@
 export interface Role {
-    id: string
-    alias: string
-    name: string
+  id: string
+  alias: string
+  name: string
 }
