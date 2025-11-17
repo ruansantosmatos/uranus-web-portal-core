@@ -1,4 +1,4 @@
-import { User } from './Users'
+import { User } from './User'
 import { Client } from './Client'
 import { Brand, Model, Situation, Type } from '@/types'
 

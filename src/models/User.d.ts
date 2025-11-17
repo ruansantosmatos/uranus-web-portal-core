@@ -3,6 +3,7 @@ import { Group } from './Group'
 import { Module } from './Module'
 import { Device } from './Device'
 import { Department } from './Department'
+import { Role } from './Role'
 
 export interface User {
   id?: string
@@ -26,5 +27,5 @@ export interface User {
   password?: string
   tenant?: string
   consent?: boolean
-  roles: IRole[]
+  roles: Role[]
 }

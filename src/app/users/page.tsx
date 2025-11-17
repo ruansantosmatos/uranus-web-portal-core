@@ -1,6 +1,9 @@
 'use client'
-import { useEffect } from 'react'
+import { User } from '@/models'
+import { Routes } from '@/constants'
 import { getHeadersFetch } from '@/utils'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { ServicesUsers } from '@/services/users'
 import {
   Card,
@@ -13,20 +16,28 @@ import {
 } from '@projectengine-team/hefesto'
 
 export default function Users() {
+
+  const route = useRouter()
+
+  const [users, setUsers] = useState<User[]>([])
+
   const headers = getHeadersFetch()
 
   const configRequest: RequestInit = { method: 'GET', headers: headers }
 
-  useEffect(() => {
-    useFetchUsers()
-  }, [])
+  useEffect(() => { useFetchUsers() }, [])
+
+  function handleRoute(path: string) {
+    route.push(path)
+  }
 
   async function useFetchUsers() {
     try {
       const response = await ServicesUsers.GetAllUsers({ request: configRequest })
-      console.log('DEU CERTO PAIZÃO ==>', response.data)
+      const users = response.data
+      setUsers(users)
     } catch (error) {
-      console.log('DEU ERRO PAIZÃO ==>', error)
+      alert('Falha na busca dos usuários')
     }
   }
 
@@ -36,11 +47,21 @@ export default function Users() {
         <Navigation>
           <NavigationList>
             <NavigationItem>
-              <NavigationLink className="cursor-default">Contas</NavigationLink>
+              <NavigationLink onClick={() => handleRoute(Routes.root.path)}>
+                Home
+              </NavigationLink>
             </NavigationItem>
-            <NavigationSeparator>/</NavigationSeparator>
+            <NavigationSeparator />
             <NavigationItem>
-              <NavigationLink className="cursor-default">Usuários</NavigationLink>
+              <NavigationLink className='cursor-auto'>
+                Contas
+              </NavigationLink>
+            </NavigationItem>
+            <NavigationSeparator />
+            <NavigationItem>
+              <NavigationLink onClick={() => handleRoute(Routes.users.path)}>
+                Usuários
+              </NavigationLink>
             </NavigationItem>
           </NavigationList>
         </Navigation>
@@ -48,7 +69,13 @@ export default function Users() {
       <div className="h-[calc(100%-2.5rem)] w-full bg-red-300 p-2">
         <Card className="h-full">
           <CardContent>
-            <p>AAA</p>
+            {
+              users.map(user => { 
+                return (
+
+                )
+              })
+            }
           </CardContent>
         </Card>
       </div>

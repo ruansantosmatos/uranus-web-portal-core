@@ -1,4 +1,5 @@
-export * from './Users'
+export * from './User'
+export * from './Role'
 export * from './Group'
 export * from './Client'
 export * from './Module'
