@@ -13,7 +13,7 @@ export const Routes: Record<Route, RouteConfig> = {
     group: 'root'
   },
   users: {
-    path: '/users',
+    path: '/user',
     group: 'Contas',
     name: 'Usuários'
   }

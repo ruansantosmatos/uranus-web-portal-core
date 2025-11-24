@@ -39,9 +39,9 @@ export function RootLayout({ children }: { children: React.ReactNode }) {
     <ThemeProvider storageTheme>
       <SidebarProvider>
         <main className={'bg-foreground h-screen w-screen dark:bg-(--background)'}>
-          <div className="bg-light flex h-16 w-full shadow-md shadow-gray-500/15 dark:border-b dark:border-b-gray-100 dark:bg-(--background) dark:shadow-none">
+          <div className="bg-light flex h-14 w-full shadow-md shadow-gray-500/15 dark:border-b dark:border-b-gray-100 dark:bg-(--background) dark:shadow-none">
             <div className="xl:[20%] hidden h-full w-[20%] items-center pl-5 sm:flex sm:w-[30%] md:w-[30%] lg:w-[20%]">
-              <Image src={Logo} alt={'logo_horizontal_default'} className={'w-[180px] object-contain'} />
+              <Image src={Logo} alt={'logo_horizontal_default'} className={'w-40 object-contain'} />
             </div>
             <div className="flex h-full w-1/2 items-center gap-2 px-3.5 text-lg font-semibold text-gray-700 sm:hidden dark:text-(--primary)">
               <SidebarTrigger />
@@ -77,7 +77,7 @@ export function RootLayout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
           <SidebarNavigation />
-          {children}
+          <div className="h-[92%] w-full">{children}</div>
         </main>
       </SidebarProvider>
     </ThemeProvider>

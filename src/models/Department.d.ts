@@ -1,7 +1,7 @@
 export interface Department {
   id: string
   client_id: string
-  name: string | null
+  name: string
   alias: string
   description: string
   active: boolean
