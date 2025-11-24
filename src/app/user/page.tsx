@@ -1,13 +1,14 @@
 'use client'
-import { Department, User } from '@/models'
-import { ConfigFetch, StatusFetch } from '@/types'
 import { useRouter } from 'next/navigation'
 import { Routes, STATUS } from '@/constants'
 import { ServicesUser } from '@/services/user'
-import { ListFilterIcon, X } from 'lucide-react'
-import { ChangeEvent, useEffect, useMemo, useState } from 'react'
-import { getHeadersFetch, getPagination } from '@/utils'
+import { CircleAlert, ListFilterIcon, X } from 'lucide-react'
+import { ServicesGroup } from '@/services/group'
+import { Department, Group, User } from '@/models'
+import { ConfigFetch, StatusFetch } from '@/types'
 import { ServicesDepartment } from '@/services/department'
+import { ChangeEvent, useEffect, useMemo, useState } from 'react'
+import { getHeadersFetch, getPagination, updateQueryParams } from '@/utils'
 import {
   Filter,
   Skeleton,
@@ -52,9 +53,12 @@ export default function Users() {
   const [total, setTotal] = useState<number>(0)
   const [limit, setLimit] = useState<number>(15)
   const [users, setUsers] = useState<User[]>([])
+  const [groups, setGroups] = useState<Group[]>([])
   const [currentPage, setCurrentPage] = useState<number>(0)
+  const [groupsError, setGroupsError] = useState<boolean>(false)
   const [departments, setDepartments] = useState<Department[]>([])
   const [statusFetch, setStatusFetch] = useState<StatusFetch>('none')
+  const [departmentError, setDepartmentError] = useState<boolean>(false)
 
   const headers = getHeadersFetch()
 
@@ -62,11 +66,7 @@ export default function Users() {
 
   const skeletonsTableRows = Array.from({ length: limit }, (_, i) => i)
 
-  const skeletonTableCell = Array.from({ length: 6 }, (_, i) => i)
-
-  const urlSearchParams = new URLSearchParams(window.location.search)
-
-  useEffect(() => { useFetchDepartments() }, [])
+  useEffect(() => { loadDefaultUseFetch() }, [])
 
   useEffect(() => { useFetchUsers() }, [currentPage, limit])
 
@@ -74,40 +74,39 @@ export default function Users() {
     return getPagination({ total, limit })
   }, [total, limit])
 
+  function loadDefaultUseFetch() {
+    useFetchGroups()
+    useFetchDepartments()
+  }
+
   function handleRoute(path: string) {
     route.push(path)
+  }
+
+  function handleFilters() {
+    useFetchUsers()
   }
 
   function returnDepartments() {
     return departments.map((item) => ({ value: item.name, label: item.name }))
   }
 
+  function returnGroups() {
+    return groups.map((item) => ({ value: item.name, label: item.name }))
+  }
+
   function handleLimit(event: ChangeEvent<HTMLSelectElement>) {
     const defaultPage = 0
-    const value = event.target.value
-    setLimit(parseInt(value))
+    const value = parseInt(event.target.value)
 
+    setLimit(value)
     setCurrentPage(defaultPage)
-    urlSearchParams.set('limit', value)
-    urlSearchParams.set('page', defaultPage.toString())
   }
 
   function handlePagination(page: string) {
     const currentPage = Number(page) - 1
     setPage(Number(page))
-
     setCurrentPage(currentPage)
-    urlSearchParams.set('page', currentPage.toString())
-  }
-
-  function verifyDefaultParameters() {
-    const hasPage = urlSearchParams.get('page')
-    const hasLimit = urlSearchParams.get('limit')
-
-    if (!hasPage && !hasLimit) {
-      urlSearchParams.append('page', currentPage.toString())
-      urlSearchParams.append('limit', limit.toString())
-    }
   }
 
   async function useFetchDepartments() {
@@ -118,18 +117,32 @@ export default function Users() {
       const data = response.data
       setDepartments(data)
     } catch (error) {
-      console.log('ERRO AO CARREGAR DEPARTAMENTOS')
+      setDepartmentError(true)
+    }
+  }
+
+  async function useFetchGroups() {
+    try {
+      const config: ConfigFetch = { request: configRequest }
+      const response = await ServicesGroup.GetAll(config)
+
+      const data = response.data
+      setGroups(data)
+    }
+    catch (error) {
+      setGroupsError(true)
     }
   }
 
   async function useFetchUsers() {
     try {
       setStatusFetch('loading')
-      verifyDefaultParameters()
+      updateQueryParams({ page: currentPage, limit: limit })
 
+      const urlSearchParams = new URLSearchParams(window.location.search)
       const params: Record<string, string> = {}
-      urlSearchParams.forEach((value, key) => params[key] = value)
 
+      urlSearchParams.forEach((value, key) => params[key] = value)
       const config: ConfigFetch = { request: configRequest, searchParams: params }
       const response = await ServicesUser.GetAll(config)
 
@@ -138,7 +151,7 @@ export default function Users() {
 
       setUsers(users)
       setTotal(totalMetada)
-      setStatusFetch('success')
+      setTimeout(() => { setStatusFetch('success') }, 500)
     } catch (error) {
       setStatusFetch('error')
     }
@@ -165,7 +178,7 @@ export default function Users() {
       </div>
       <div className="mt-2 w-full px-2">
         <Filter>
-          <FilterValue className="w-full">
+          <FilterValue className="w-full" onDeleteBadge={handleFilters}>
             <FilterTrigger />
           </FilterValue>
           <FilterWrapper>
@@ -191,7 +204,9 @@ export default function Users() {
                   <FilterInput type={'text'} name={'login'} label={'Login'} />
                 </FilterItem>
                 <FilterItem>
-                  <FilterLabel htmlFor="department">Departamentos</FilterLabel>
+                  <FilterLabel htmlFor="department">
+                    Departamentos {departmentError && <span className='bg-red-500'>(Falha na busca dos dados)</span>}
+                  </FilterLabel>
                   <FilterSelect
                     name={'department'}
                     placeholder={'Selecionar'}
@@ -199,10 +214,25 @@ export default function Users() {
                     option={returnDepartments()}
                   />
                 </FilterItem>
+                <FilterItem>
+                  <FilterLabel htmlFor="department">
+                    Grupos {groupsError && <span className='bg-red-500'>(Falha na busca dos dados)</span>}
+                  </FilterLabel>
+                  <FilterSelect
+                    name={'group'}
+                    placeholder={'Selecionar'}
+                    label={'Grupo'}
+                    option={returnGroups()}
+                  />
+                </FilterItem>
               </FilterForm>
               <FilterFooter>
-                <FilterSubmit onSubmit={useFetchUsers}>FILTRAR</FilterSubmit>
-                <FilterClear>LIMPAR TODOS</FilterClear>
+                <FilterSubmit onSubmit={handleFilters}>
+                  FILTRAR
+                </FilterSubmit>
+                <FilterClear>
+                  LIMPAR TODOS
+                </FilterClear>
               </FilterFooter>
             </FilterContent>
           </FilterWrapper>
@@ -228,16 +258,26 @@ export default function Users() {
               </TableRow>
             )}
             {statusFetch === 'loading' &&
-              skeletonsTableRows.map(() => {
-                return skeletonTableCell.map((_, index) => {
-                  return (
-                    <TableRow key={index}>
-                      <TableCell>
-                        <Skeleton />
-                      </TableCell>
-                    </TableRow>
-                  )
-                })
+              skeletonsTableRows.map((_, index) => {
+                return (
+                  <TableRow key={index}>
+                    <TableCell>
+                      <Skeleton />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton />
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      <Skeleton />
+                    </TableCell>
+                    <TableCell className="hidden lg:table-cell">
+                      <Skeleton />
+                    </TableCell>
+                  </TableRow>
+                )
               })}
             {users.length > 0 &&
               statusFetch === 'success' &&

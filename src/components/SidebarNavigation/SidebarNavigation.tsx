@@ -24,9 +24,8 @@ export function SidebarNavigation() {
 
   function navigation(configRoute: RouteConfig) {
     const path = configRoute.path
-    const searchParams = `?route=${configRoute.name}&group=${configRoute.group}`
+    route.push(`${path}`)
 
-    route.push(`${path}${searchParams}`)
     setOpen(false)
     setOpenMobile(false)
   }

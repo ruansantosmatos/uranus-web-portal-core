@@ -22,19 +22,6 @@ import {
 } from '@projectengine-team/hefesto'
 
 export function RootLayout({ children }: { children: React.ReactNode }) {
-  const [label, setLabel] = useState<string>('')
-
-  const searchParams = useSearchParams()
-
-  useEffect(() => {
-    loadGroupLabel()
-  }, [searchParams])
-
-  function loadGroupLabel() {
-    const label = searchParams.get('group') ?? ''
-    setLabel(label)
-  }
-
   return (
     <ThemeProvider storageTheme>
       <SidebarProvider>
@@ -45,7 +32,6 @@ export function RootLayout({ children }: { children: React.ReactNode }) {
             </div>
             <div className="flex h-full w-1/2 items-center gap-2 px-3.5 text-lg font-semibold text-gray-700 sm:hidden dark:text-(--primary)">
               <SidebarTrigger />
-              <span>{label}</span>
             </div>
             <div className="flex h-full w-1/2 flex-row-reverse items-center justify-end sm:w-[80%] md:w-[70%] lg:w-[80%]">
               <div className="flex h-full w-full flex-row-reverse items-center justify-start gap-4 px-3 text-gray-700 sm:px-5">
