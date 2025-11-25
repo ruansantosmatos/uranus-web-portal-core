@@ -11,5 +11,5 @@ export function updateQueryParams(params: Record<string, string | number | null 
   })
 
   const newUrl = `${url.pathname}?${searchParams.toString()}`
-  window.history.replaceState({}, '', newUrl) 
+  window.history.replaceState({}, '', newUrl)
 }

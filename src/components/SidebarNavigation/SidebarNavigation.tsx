@@ -31,7 +31,7 @@ export function SidebarNavigation() {
   }
 
   return (
-    <Sidebar>
+    <Sidebar className="z-9999">
       <SidebarContent>
         <SidebarGroupContent className="pt-10 sm:pt-8">
           <Accordion>

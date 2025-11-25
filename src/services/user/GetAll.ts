@@ -6,7 +6,7 @@ export async function GetAll(config: ConfigFetch): Promise<ResponseFetch<User[]>
   try {
     const { request, searchParams } = config
     const url = `api/user${buildQueryString(searchParams)}`
-    
+
     const response = await fetch(url, request)
     const data = (await response.json()) as ResponseFetch<User[]>
     return data

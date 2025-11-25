@@ -1,33 +1,23 @@
 'use client'
+import { Routes } from '@/constants'
 import { useRouter } from 'next/navigation'
-import { Routes, STATUS } from '@/constants'
+import { TableUser } from '@/components/User'
 import { ServicesUser } from '@/services/user'
-import { CircleAlert, ListFilterIcon, X } from 'lucide-react'
 import { ServicesGroup } from '@/services/group'
 import { Department, Group, User } from '@/models'
 import { ConfigFetch, StatusFetch } from '@/types'
+import { ChangeEvent, useEffect, useState } from 'react'
 import { ServicesDepartment } from '@/services/department'
-import { ChangeEvent, useEffect, useMemo, useState } from 'react'
-import { getHeadersFetch, getPagination, updateQueryParams } from '@/utils'
+import { getHeadersFetch, updateQueryParams } from '@/utils'
+import { PaginationTable } from '@/components/PaginationTable'
+import { ListFilterIcon, UserPlus2Icon, X } from 'lucide-react'
 import {
   Filter,
-  Skeleton,
   Navigation,
-  Table,
-  TableRow,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
   NavigationItem,
   NavigationLink,
   NavigationList,
   NavigationSeparator,
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationNext,
-  PaginationPrevious,
   FilterTrigger,
   FilterValue,
   FilterWrapper,
@@ -43,8 +33,7 @@ import {
   FilterSelect,
   FilterSubmit,
   FilterTitle,
-  NativeSelect,
-  NativeSelectOption
+  Button
 } from '@projectengine-team/hefesto'
 
 export default function Users() {
@@ -64,15 +53,19 @@ export default function Users() {
 
   const configRequest: RequestInit = { method: 'GET', headers: headers }
 
-  const skeletonsTableRows = Array.from({ length: limit }, (_, i) => i)
+  const statusUser: { value: string, label: string }[] = [
+    { value: 'ATIVO', label: 'ATIVO' },
+    { value: 'INATIVO', label: 'INATIVO' }
+  ]
+
+  const transformers: Record<string, (value: string) => string | boolean | number> = {
+    'cpf': (value) => value.replace(/\D/g, ""),
+    'active': (value) => value.toUpperCase() === "ATIVO"
+  }
 
   useEffect(() => { loadDefaultUseFetch() }, [])
 
   useEffect(() => { useFetchUsers() }, [currentPage, limit])
-
-  const { visiblePages, hiddenPages, firstHiddenPage } = useMemo(() => {
-    return getPagination({ total, limit })
-  }, [total, limit])
 
   function loadDefaultUseFetch() {
     useFetchGroups()
@@ -81,10 +74,6 @@ export default function Users() {
 
   function handleRoute(path: string) {
     route.push(path)
-  }
-
-  function handleFilters() {
-    useFetchUsers()
   }
 
   function returnDepartments() {
@@ -109,6 +98,18 @@ export default function Users() {
     setCurrentPage(currentPage)
   }
 
+  function returnSearchParams() {
+    const urlSearchParams = new URLSearchParams(window.location.search)
+    const params: Record<string, any> = {}
+
+    urlSearchParams.forEach((value, key) => {
+      const transform = transformers[key]
+      params[key] = transform ? transform(value) : value
+    })
+
+    return params
+  }
+
   async function useFetchDepartments() {
     try {
       const config: ConfigFetch = { request: configRequest }
@@ -128,8 +129,7 @@ export default function Users() {
 
       const data = response.data
       setGroups(data)
-    }
-    catch (error) {
+    } catch (error) {
       setGroupsError(true)
     }
   }
@@ -138,11 +138,8 @@ export default function Users() {
     try {
       setStatusFetch('loading')
       updateQueryParams({ page: currentPage, limit: limit })
+      const params: Record<string, string> = returnSearchParams()
 
-      const urlSearchParams = new URLSearchParams(window.location.search)
-      const params: Record<string, string> = {}
-
-      urlSearchParams.forEach((value, key) => params[key] = value)
       const config: ConfigFetch = { request: configRequest, searchParams: params }
       const response = await ServicesUser.GetAll(config)
 
@@ -159,9 +156,9 @@ export default function Users() {
 
   return (
     <section className="h-full w-full overflow-y-scroll">
-      <div className="">
-        <Navigation className="h-12">
-          <NavigationList className="h-full items-center px-5">
+      <div className="flex h-14 w-full items-center justify-between px-5">
+        <Navigation>
+          <NavigationList>
             <NavigationItem>
               <NavigationLink onClick={() => handleRoute(Routes.root.path)}>Home</NavigationLink>
             </NavigationItem>
@@ -175,10 +172,16 @@ export default function Users() {
             </NavigationItem>
           </NavigationList>
         </Navigation>
+        <div>
+          <Button>
+            <UserPlus2Icon size={20} />
+            <span className="sr-only sm:not-sr-only">NOVO USUÁRIO</span>
+          </Button>
+        </div>
       </div>
       <div className="mt-2 w-full px-2">
         <Filter>
-          <FilterValue className="w-full" onDeleteBadge={handleFilters}>
+          <FilterValue className="w-full" onDeleteBadge={useFetchUsers}>
             <FilterTrigger />
           </FilterValue>
           <FilterWrapper>
@@ -205,7 +208,7 @@ export default function Users() {
                 </FilterItem>
                 <FilterItem>
                   <FilterLabel htmlFor="department">
-                    Departamentos {departmentError && <span className='bg-red-500'>(Falha na busca dos dados)</span>}
+                    Departamentos {departmentError && <span className="bg-red-500">(Falha na busca dos dados)</span>}
                   </FilterLabel>
                   <FilterSelect
                     name={'department'}
@@ -216,133 +219,36 @@ export default function Users() {
                 </FilterItem>
                 <FilterItem>
                   <FilterLabel htmlFor="department">
-                    Grupos {groupsError && <span className='bg-red-500'>(Falha na busca dos dados)</span>}
+                    Grupos {groupsError && <span className="bg-red-500">(Falha na busca dos dados)</span>}
                   </FilterLabel>
-                  <FilterSelect
-                    name={'group'}
-                    placeholder={'Selecionar'}
-                    label={'Grupo'}
-                    option={returnGroups()}
-                  />
+                  <FilterSelect name={'group'} placeholder={'Selecionar'} label={'Grupo'} option={returnGroups()} />
+                </FilterItem>
+                <FilterItem>
+                  <FilterLabel htmlFor="active">Status</FilterLabel>
+                  <FilterSelect name={'active'} label={'Status'} option={statusUser} placeholder={'Selecionar'} />
                 </FilterItem>
               </FilterForm>
               <FilterFooter>
-                <FilterSubmit onSubmit={handleFilters}>
-                  FILTRAR
-                </FilterSubmit>
-                <FilterClear>
-                  LIMPAR TODOS
-                </FilterClear>
+                <FilterSubmit onSubmit={useFetchUsers}>FILTRAR</FilterSubmit>
+                <FilterClear onClear={useFetchUsers}>LIMPAR TODOS</FilterClear>
               </FilterFooter>
             </FilterContent>
           </FilterWrapper>
         </Filter>
       </div>
       <div className="mt-1 w-full p-2">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nome Completo</TableHead>
-              <TableHead>Login</TableHead>
-              <TableHead className="hidden md:table-cell">Email</TableHead>
-              <TableHead className="hidden lg:table-cell">Grupos</TableHead>
-              <TableHead>Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {users.length === 0 && statusFetch === 'success' && (
-              <TableRow>
-                <TableCell colSpan={5} className="font-bold">
-                  Nenhum resultado encontrado
-                </TableCell>
-              </TableRow>
-            )}
-            {statusFetch === 'loading' &&
-              skeletonsTableRows.map((_, index) => {
-                return (
-                  <TableRow key={index}>
-                    <TableCell>
-                      <Skeleton />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton />
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      <Skeleton />
-                    </TableCell>
-                    <TableCell className="hidden lg:table-cell">
-                      <Skeleton />
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
-            {users.length > 0 &&
-              statusFetch === 'success' &&
-              users.map((user) => {
-                return (
-                  <TableRow key={user.id}>
-                    <TableCell>{user.name}</TableCell>
-                    <TableCell>{user.login}</TableCell>
-                    <TableCell className="hidden md:table-cell">{user.email}</TableCell>
-                    <TableCell className="hidden lg:table-cell">{user.departments?.name ?? '--'}</TableCell>
-                    <TableCell className={user.active ? STATUS.active.color : STATUS.inactive.color}>
-                      {user.active ? STATUS.active.label : STATUS.inactive.label}
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
-          </TableBody>
-        </Table>
-        <Pagination pages={Math.round(total / limit)} className="mt-1.5 gap-x-3">
-          <div>
-            <p className="dark:text-light">
-              {page} - {limit} de {total}
-            </p>
-          </div>
-          <div>
-            <NativeSelect defaultValue={'15'} onChange={handleLimit}>
-              <NativeSelectOption value={'15'}>15</NativeSelectOption>
-              <NativeSelectOption value={'45'}>45</NativeSelectOption>
-              <NativeSelectOption value={'60'}>60</NativeSelectOption>
-              <NativeSelectOption value={'100'}>100</NativeSelectOption>
-            </NativeSelect>
-          </div>
-          <div>
-            <PaginationPrevious handlePagination={handlePagination} />
-          </div>
-          <PaginationContent className="hidden sm:inline-flex">
-            {page <= firstHiddenPage &&
-              visiblePages.map((item) => {
-                return (
-                  <PaginationItem
-                    key={`page-item-${item}`}
-                    value={(item + 1).toString()}
-                    onClick={() => handlePagination((item + 1).toString())}
-                  >
-                    {item + 1}
-                  </PaginationItem>
-                )
-              })}
-            {page > firstHiddenPage &&
-              hiddenPages.map((item) => {
-                return (
-                  <PaginationItem
-                    key={`page-item-${item}`}
-                    value={(item + 1).toString()}
-                    onClick={() => handlePagination((item + 1).toString())}
-                  >
-                    {item + 1}
-                  </PaginationItem>
-                )
-              })}
-          </PaginationContent>
-          <div>
-            <PaginationNext handlePagination={handlePagination} />
-          </div>
-        </Pagination>
+        <TableUser
+          users={users}
+          limit={limit}
+          statusFetch={statusFetch}
+        />
+        <PaginationTable
+          page={page}
+          total={total}
+          limit={limit}
+          handleLimit={handleLimit}
+          handlePagination={handlePagination}
+        />
       </div>
     </section>
   )
