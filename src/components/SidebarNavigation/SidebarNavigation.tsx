@@ -1,6 +1,5 @@
 'use client'
 import { useRouter } from 'next/navigation'
-import { RouteConfig, Routes } from '@/constants'
 import {
   Sidebar,
   Accordion,
@@ -22,9 +21,8 @@ export function SidebarNavigation() {
 
   const { setOpen, setOpenMobile } = useSidebar()
 
-  function navigation(configRoute: RouteConfig) {
-    const path = configRoute.path
-    route.push(`${path}`)
+  function navigation(path: string) {
+    route.push(path)
 
     setOpen(false)
     setOpenMobile(false)
@@ -48,7 +46,7 @@ export function SidebarNavigation() {
                       <SidebarButton>Cliente</SidebarButton>
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
-                      <SidebarButton onClick={() => navigation(Routes.users)}>Usuários</SidebarButton>
+                      <SidebarButton onClick={() => navigation('/user')}>Usuários</SidebarButton>
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
                       <SidebarButton>Grupos</SidebarButton>

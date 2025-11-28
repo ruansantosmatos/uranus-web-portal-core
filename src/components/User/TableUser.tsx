@@ -1,6 +1,8 @@
+'use client'
 import { User } from '@/models'
 import { STATUS } from '@/constants'
 import { StatusFetch } from '@/types'
+import { useRouter } from 'next/navigation'
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Skeleton, Table } from '@projectengine-team/hefesto'
 
 export type TableUserProps = {
@@ -10,8 +12,13 @@ export type TableUserProps = {
 }
 
 export function TableUser({ users, limit, statusFetch }: TableUserProps) {
+  const route = useRouter()
 
   const skeletonsTableRows = Array.from({ length: limit }, (_, i) => i)
+
+  function handleOnclick(login: string) {
+    route.push(`/user/${login}`)
+  }
 
   return (
     <Table>
@@ -54,15 +61,16 @@ export function TableUser({ users, limit, statusFetch }: TableUserProps) {
               </TableRow>
             )
           })}
-        {users.length > 0 && statusFetch === 'success' &&
+        {users.length > 0 &&
+          statusFetch === 'success' &&
           users.map((user) => {
             return (
-              <TableRow key={user.id}>
+              <TableRow key={user.id} onClick={() => handleOnclick(user.login as string)}>
                 <TableCell>{user.name}</TableCell>
                 <TableCell>{user.login}</TableCell>
                 <TableCell className="hidden md:table-cell">{user.email}</TableCell>
                 <TableCell className="hidden lg:table-cell">
-                    {user.groups?.map((value) => value.name).join(' / ') ?? '--'}
+                  {user.groups?.map((value) => value.name).join(' / ') ?? '--'}
                 </TableCell>
                 <TableCell className={user.active ? STATUS.active.color : STATUS.inactive.color}>
                   {user.active ? STATUS.active.label : STATUS.inactive.label}

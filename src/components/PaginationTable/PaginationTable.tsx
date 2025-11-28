@@ -19,7 +19,6 @@ export type PaginationTableProps = {
 }
 
 export function PaginationTable({ page, total, limit, handleLimit, handlePagination }: PaginationTableProps) {
-
   const disableActions = total < limit
 
   const { visiblePages, hiddenPages, firstHiddenPage } = useMemo(() => {

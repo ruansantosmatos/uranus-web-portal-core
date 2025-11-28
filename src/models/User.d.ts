@@ -1,9 +1,9 @@
-import { Client } from './Client'
+import { Role } from './Role'
 import { Group } from './Group'
+import { Client } from './Client'
 import { Module } from './Module'
 import { Device } from './Device'
 import { Department } from './Department'
-import { Role } from './Role'
 
 export interface User {
   id?: string

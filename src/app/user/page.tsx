@@ -1,5 +1,4 @@
 'use client'
-import { Routes } from '@/constants'
 import { useRouter } from 'next/navigation'
 import { TableUser } from '@/components/User'
 import { ServicesUser } from '@/services/user'
@@ -53,19 +52,23 @@ export default function Users() {
 
   const configRequest: RequestInit = { method: 'GET', headers: headers }
 
-  const statusUser: { value: string, label: string }[] = [
+  const statusUser: { value: string; label: string }[] = [
     { value: 'ATIVO', label: 'ATIVO' },
     { value: 'INATIVO', label: 'INATIVO' }
   ]
 
   const transformers: Record<string, (value: string) => string | boolean | number> = {
-    'cpf': (value) => value.replace(/\D/g, ""),
-    'active': (value) => value.toUpperCase() === "ATIVO"
+    cpf: (value) => value.replace(/\D/g, ''),
+    active: (value) => value.toUpperCase() === 'ATIVO'
   }
 
-  useEffect(() => { loadDefaultUseFetch() }, [])
+  useEffect(() => {
+    loadDefaultUseFetch()
+  }, [])
 
-  useEffect(() => { useFetchUsers() }, [currentPage, limit])
+  useEffect(() => {
+    useFetchUsers()
+  }, [currentPage, limit])
 
   function loadDefaultUseFetch() {
     useFetchGroups()
@@ -148,27 +151,23 @@ export default function Users() {
 
       setUsers(users)
       setTotal(totalMetada)
-      setTimeout(() => { setStatusFetch('success') }, 500)
+      setTimeout(() => { setStatusFetch('success')}, 200)
     } catch (error) {
       setStatusFetch('error')
     }
   }
 
   return (
-    <section className="h-full w-full overflow-y-scroll">
+    <section className="h-screen w-full">
       <div className="flex h-14 w-full items-center justify-between px-5">
         <Navigation>
           <NavigationList>
             <NavigationItem>
-              <NavigationLink onClick={() => handleRoute(Routes.root.path)}>Home</NavigationLink>
+              <NavigationLink onClick={() => handleRoute('/')}>Home</NavigationLink>
             </NavigationItem>
             <NavigationSeparator />
             <NavigationItem>
-              <NavigationLink className="cursor-auto">Contas</NavigationLink>
-            </NavigationItem>
-            <NavigationSeparator />
-            <NavigationItem>
-              <NavigationLink onClick={() => handleRoute(Routes.users.path)}>Usuários</NavigationLink>
+              <NavigationLink onClick={() => handleRoute('/user')}>Usuários</NavigationLink>
             </NavigationItem>
           </NavigationList>
         </Navigation>
@@ -237,10 +236,10 @@ export default function Users() {
         </Filter>
       </div>
       <div className="mt-1 w-full p-2">
-        <TableUser
-          users={users}
-          limit={limit}
-          statusFetch={statusFetch}
+        <TableUser 
+          users={users} 
+          limit={limit} 
+          statusFetch={statusFetch} 
         />
         <PaginationTable
           page={page}

@@ -8,8 +8,9 @@ export function getHeadersFetch() {
   const token = auth.user?.access_token ?? ''
 
   const configRequest: HeadersInit = {
-    'X-Tenant': env.IS_TENANT || '',
     'X-GatewayUrl': env.APIM_URL,
+    'X-Tenant': env.IS_TENANT || '',
+    "Content-Type": "application/json",
     Authorization: `Bearer ${token}`
   }
 

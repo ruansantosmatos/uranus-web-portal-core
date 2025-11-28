@@ -1,3 +1,4 @@
+export * from './User'
 export * from './Brand'
 export * from './Types'
 export * from './Model'
