@@ -10,7 +10,7 @@ export function getHeadersFetch() {
   const configRequest: HeadersInit = {
     'X-GatewayUrl': env.APIM_URL,
     'X-Tenant': env.IS_TENANT || '',
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
     Authorization: `Bearer ${token}`
   }
 

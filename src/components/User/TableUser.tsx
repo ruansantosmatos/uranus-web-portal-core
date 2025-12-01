@@ -17,7 +17,8 @@ export function TableUser({ users, limit, statusFetch }: TableUserProps) {
   const skeletonsTableRows = Array.from({ length: limit }, (_, i) => i)
 
   function handleOnclick(login: string) {
-    route.push(`/user/${login}`)
+    const searchParams = new URLSearchParams(window.location.search).toString()
+    route.push(`/user/${login}?${searchParams}`)
   }
 
   return (

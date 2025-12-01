@@ -1,14 +1,14 @@
 'use client'
-import * as z from "zod"
+import * as z from 'zod'
 import { KeySquare } from 'lucide-react'
-import { useForm } from "react-hook-form"
+import { useForm } from 'react-hook-form'
 import { useEffect, useState } from 'react'
 import { ServicesUser } from '@/services/user'
 import { ConfigFetch, StatusFetch, UpdateUserPassword } from '@/types'
 import { formatDate, getHeadersFetch } from '@/utils'
 import { useParams, useRouter } from 'next/navigation'
-import { zodResolver } from "@hookform/resolvers/zod"
-import { UpdatePasswordData, UpdatePasswordSchema, UserByLogin } from "@/types"
+import { zodResolver } from '@hookform/resolvers/zod'
+import { UpdatePasswordData, UpdatePasswordSchema, UserByLogin } from '@/types'
 import {
   Button,
   Dialog,
@@ -57,7 +57,7 @@ export default function UserDetailProfile() {
 
   const schemaCore: UpdatePasswordSchema = {
     password: z.string().min(6, 'Deve possuir no mínimo 6 carcteres'),
-    newPassword: z.string().min(6, 'Deve possuir no mínimo 6 carcteres'),
+    newPassword: z.string().min(6, 'Deve possuir no mínimo 6 carcteres')
   }
 
   const schemaValidation = z.object<UpdatePasswordSchema>(schemaCore).required()
@@ -77,7 +77,8 @@ export default function UserDetailProfile() {
   useEffect(() => { useFetchUserByLogin() }, [])
 
   function handleRoute(path: string) {
-    route.push(path)
+    const searchParams = new URLSearchParams(window.location.search).toString()
+    route.push(`${path}?${searchParams}`)
   }
 
   function openModalPassword() {
@@ -116,11 +117,11 @@ export default function UserDetailProfile() {
 
       if (password === newPassword) {
         const body: UpdateUserPassword = { temporary: true, password: newPassword }
-        
-        const configRequest: RequestInit = { 
-          method: 'PUT', 
-          headers: headers, 
-          body: JSON.stringify(body) 
+
+        const configRequest: RequestInit = {
+          method: 'PUT',
+          headers: headers,
+          body: JSON.stringify(body)
         }
 
         const config: ConfigFetch = { request: configRequest }
@@ -128,13 +129,11 @@ export default function UserDetailProfile() {
 
         setTimeout(() => setStatusUpdate('success'), 500)
         closeModalPassword()
-      }
-      else {
+      } else {
         setStatusUpdate('none')
         setError('password', { message: 'As senhas devem ser iguais!' })
       }
-    }
-    catch (error) {
+    } catch (error) {
       setStatusUpdate('none')
       setModalPassword(false)
       alert('Ops! Houve uma falha na atualização da senha, tente novamente!')
@@ -147,7 +146,7 @@ export default function UserDetailProfile() {
 
   return (
     <section className="h-screen w-full">
-      <div className='w-full py-2 px-5 flex justify-between items-center'>
+      <div className="flex w-full items-center justify-between px-5 py-2">
         <Navigation>
           <NavigationList>
             <NavigationItem>
@@ -159,16 +158,16 @@ export default function UserDetailProfile() {
             </NavigationItem>
           </NavigationList>
         </Navigation>
-        <Button className='sm:hidden' onClick={openModalPassword}>
+        <Button className="sm:hidden" onClick={openModalPassword}>
           <KeySquare size={20} />
           <span className="sr-only sm:not-sr-only">ALTERAR SENHA</span>
         </Button>
       </div>
-      <div className="h-[95%] w-full flex justify-center">
+      <div className="flex h-[95%] w-full justify-center">
         <Dialog open={modalPassword}>
           <DialogWrapper closable={false}>
-            <DialogContent className='w-[90%] md:w-[60%] xl:w-[30%]'>
-              <DialogHeader className='px-6'>
+            <DialogContent className="w-[90%] md:w-[60%] xl:w-[30%]">
+              <DialogHeader className="px-6">
                 <DialogTitle>Alterar Senha</DialogTitle>
               </DialogHeader>
               <DialogBody>
@@ -176,26 +175,26 @@ export default function UserDetailProfile() {
                   method="post"
                   id="form-update-password"
                   onSubmit={handleSubmit(useUpdatePassword)}
-                  className='w-full h-full flex flex-col gap-1'
+                  className="flex h-full w-full flex-col gap-1"
                 >
-                  <div className='w-full p-2 flex flex-col gap-0.5'>
-                    <Label require htmlFor='password' className='ml-0.5'>Senha</Label>
-                    <Input type='password' onFocus={() => clearErrors('password')} {...register('password')} />
-                    <p className="text-red-400 text-sm">{errors.password?.message}</p>
+                  <div className="flex w-full flex-col gap-0.5 p-2">
+                    <Label require htmlFor="password" className="ml-0.5">
+                      Senha
+                    </Label>
+                    <Input type="password" onFocus={() => clearErrors('password')} {...register('password')} />
+                    <p className="text-sm text-red-400">{errors.password?.message}</p>
                   </div>
-                  <div className='w-full p-2 flex flex-col gap-0.5'>
-                    <Label require htmlFor='new-password' className='ml-0.5'>Nova Senha</Label>
-                    <Input type='password' onFocus={() => clearErrors('newPassword')} {...register('newPassword')} />
-                    <p className="text-red-400 text-sm">{errors.newPassword?.message}</p>
+                  <div className="flex w-full flex-col gap-0.5 p-2">
+                    <Label require htmlFor="new-password" className="ml-0.5">
+                      Nova Senha
+                    </Label>
+                    <Input type="password" onFocus={() => clearErrors('newPassword')} {...register('newPassword')} />
+                    <p className="text-sm text-red-400">{errors.newPassword?.message}</p>
                   </div>
                 </form>
               </DialogBody>
               <DialogFooter>
-                <Button
-                  variant="outline"
-                  onClick={closeModalPassword}
-                  disabled={statusUpdate === 'loading'}
-                >
+                <Button variant="outline" onClick={closeModalPassword} disabled={statusUpdate === 'loading'}>
                   CANCELAR
                 </Button>
                 <Button
@@ -212,20 +211,18 @@ export default function UserDetailProfile() {
         </Dialog>
         <Document className="mt-2 h-[70%] w-[90%] md:h-[65%] md:w-[95%] xl:w-[75%]">
           <DocumentHeader>
-            <DocumentTitle>
-              {statusFetch === 'success' ? user.name : 'Carregando..'}
-            </DocumentTitle>
+            <DocumentTitle>{statusFetch === 'success' ? user.name : 'Carregando..'}</DocumentTitle>
             <DocumentStatus variant={user.active ? 'success' : 'error'}>
               {user.active ? 'ATIVO' : 'INATIVO'}
             </DocumentStatus>
           </DocumentHeader>
           <DocumentDivider />
-          <DocumentBody className=''>
+          <DocumentBody className="">
             <DocumentSection>
               <DocumentSectionHeader>
                 <DocumentSectionTitle className="text-lg">Dados Pessoais</DocumentSectionTitle>
               </DocumentSectionHeader>
-              <DocumentSectionContent className='md:grid-cols-2 lg:grid-cols-3'>
+              <DocumentSectionContent className="md:grid-cols-2 lg:grid-cols-3">
                 <DocumentItem>
                   <DocumentItemTitle>Nome Completo</DocumentItemTitle>
                   <CustomDocumentItem value={user.name ?? '--'} />
@@ -265,7 +262,7 @@ export default function UserDetailProfile() {
               <DocumentSectionHeader>
                 <DocumentSectionTitle className="text-lg">Atribuição</DocumentSectionTitle>
               </DocumentSectionHeader>
-              <DocumentSectionContent className='md:grid-cols-2 lg:grid-cols-3'>
+              <DocumentSectionContent className="md:grid-cols-2 lg:grid-cols-3">
                 <DocumentItem>
                   <DocumentItemTitle>Grupos</DocumentItemTitle>
                   <CustomDocumentItem value={userGroups} />
@@ -281,7 +278,7 @@ export default function UserDetailProfile() {
               <DocumentSectionHeader>
                 <DocumentSectionTitle className="text-lg">Aparelhos</DocumentSectionTitle>
               </DocumentSectionHeader>
-              <DocumentSectionContent className='md:grid-cols-2 lg:grid-cols-3'>
+              <DocumentSectionContent className="md:grid-cols-2 lg:grid-cols-3">
                 {statusFetch !== 'success' ? (
                   <Skeleton />
                 ) : user.devices?.length === 0 ? (
@@ -302,9 +299,15 @@ export default function UserDetailProfile() {
             </DocumentSection>
           </DocumentBody>
           <DocumentFooter>
-            <Button variant={'outline'} className='hidden sm:flex' onClick={openModalPassword}>ALTERAR SENHA</Button>
-            <Button variant={'outline'} onClick={() => handleRoute('/user')}>VOLTAR</Button>
-            <Button variant={'default'} onClick={() => handleRoute('/form')}>EDITAR</Button>
+            <Button variant={'outline'} className="hidden sm:flex" onClick={openModalPassword}>
+              ALTERAR SENHA
+            </Button>
+            <Button variant={'outline'} onClick={() => handleRoute('/user')}>
+              VOLTAR
+            </Button>
+            <Button variant={'default'} onClick={() => handleRoute('/form')}>
+              EDITAR
+            </Button>
           </DocumentFooter>
         </Document>
       </div>
