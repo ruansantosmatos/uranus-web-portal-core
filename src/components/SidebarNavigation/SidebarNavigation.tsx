@@ -19,7 +19,7 @@ import {
 export function SidebarNavigation() {
   const route = useRouter()
 
-  const { setOpen, setOpenMobile } = useSidebar()
+  const { setOpen, setOpenMobile, open } = useSidebar()
 
   function navigation(path: string) {
     route.push(path)
@@ -29,7 +29,7 @@ export function SidebarNavigation() {
   }
 
   return (
-    <Sidebar className="z-9999">
+    <Sidebar className={`transition-all ease-linear duration-200 ${open ? 'md:w-72' : 'md:w-0'}`}>
       <SidebarContent>
         <SidebarGroupContent className="pt-10 sm:pt-8">
           <Accordion>

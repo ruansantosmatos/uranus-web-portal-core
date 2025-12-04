@@ -1,3 +1,4 @@
+'use client'
 import { useEffect } from 'react'
 import { TypeForm } from '@/types'
 import { getHeadersFetch } from '@/utils'
@@ -19,7 +20,7 @@ export default function FormUser() {
 
   const searchParams = useSearchParams()
 
-  const typeForm: TypeForm = (searchParams.get('type') as TypeForm) ?? 'create'
+  const typeForm: TypeForm = (searchParams.get('type_form') as TypeForm) ?? 'create'
 
   useEffect(() => {
     console.log('TIPO FORMULÁRIO ==>', typeForm)

@@ -42,7 +42,6 @@ export default function Users() {
   const [limit, setLimit] = useState<number>(15)
   const [users, setUsers] = useState<User[]>([])
   const [groups, setGroups] = useState<Group[]>([])
-  const [currentPage, setCurrentPage] = useState<number>(0)
   const [groupsError, setGroupsError] = useState<boolean>(false)
   const [departments, setDepartments] = useState<Department[]>([])
   const [statusFetch, setStatusFetch] = useState<StatusFetch>('none')
@@ -68,7 +67,7 @@ export default function Users() {
 
   useEffect(() => {
     useFetchUsers()
-  }, [currentPage, limit])
+  }, [page, limit])
 
   function loadDefaultUseFetch() {
     useFetchGroups()
@@ -92,13 +91,13 @@ export default function Users() {
     const value = parseInt(event.target.value)
 
     setLimit(value)
-    setCurrentPage(defaultPage)
+    setPage(defaultPage)
+    updateQueryParams({ page: defaultPage, limit: value })
   }
 
   function handlePagination(page: string) {
-    const currentPage = Number(page) - 1
     setPage(Number(page))
-    setCurrentPage(currentPage)
+    updateQueryParams({ page: page })
   }
 
   function returnSearchParams() {
@@ -140,18 +139,26 @@ export default function Users() {
   async function useFetchUsers() {
     try {
       setStatusFetch('loading')
-      updateQueryParams({ page: currentPage, limit: limit })
       const params: Record<string, string> = returnSearchParams()
+      const paramsActive = Object.entries(params)
 
-      const config: ConfigFetch = { request: configRequest, searchParams: params }
+      setPage(parseInt(params.page ?? page))
+      setLimit(parseInt(params.limit ?? limit))
+
+      const config: ConfigFetch = {
+        request: configRequest,
+        searchParams: paramsActive.length > 0 ? params : { page, limit }
+      }
+
       const response = await ServicesUser.GetAll(config)
-
       const users = response.data
       const totalMetada = response.metadata.total
 
       setUsers(users)
       setTotal(totalMetada)
-      setTimeout(() => { setStatusFetch('success')}, 200)
+      setTimeout(() => {
+        setStatusFetch('success')
+      }, 200)
     } catch (error) {
       setStatusFetch('error')
     }
@@ -178,7 +185,7 @@ export default function Users() {
           </Button>
         </div>
       </div>
-      <div className="mt-2 w-full px-2">
+      <div className="mt-2 w-full px-4">
         <Filter>
           <FilterValue className="w-full" onDeleteBadge={useFetchUsers}>
             <FilterTrigger />
@@ -235,12 +242,8 @@ export default function Users() {
           </FilterWrapper>
         </Filter>
       </div>
-      <div className="mt-1 w-full p-2">
-        <TableUser 
-          users={users} 
-          limit={limit} 
-          statusFetch={statusFetch} 
-        />
+      <div className="w-full px-4 mt-3">
+        <TableUser users={users} limit={limit} statusFetch={statusFetch} />
         <PaginationTable
           page={page}
           total={total}

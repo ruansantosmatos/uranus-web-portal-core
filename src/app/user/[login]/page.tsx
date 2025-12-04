@@ -1,5 +1,6 @@
 'use client'
 import * as z from 'zod'
+import Swal from 'sweetalert2'
 import { KeySquare } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { useEffect, useState } from 'react'
@@ -53,6 +54,8 @@ export default function UserDetailProfile() {
 
   const headers = getHeadersFetch()
 
+  const searchParams = new URLSearchParams(window.location.search)
+
   const userGroups = user.groups?.map((value) => value.name).join(' / ') ?? '--'
 
   const schemaCore: UpdatePasswordSchema = {
@@ -74,11 +77,18 @@ export default function UserDetailProfile() {
     shouldFocusError: false
   })
 
-  useEffect(() => { useFetchUserByLogin() }, [])
+  useEffect(() => {
+    useFetchUserByLogin()
+  }, [])
 
   function handleRoute(path: string) {
-    const searchParams = new URLSearchParams(window.location.search).toString()
-    route.push(`${path}?${searchParams}`)
+    searchParams.delete('type_form', 'update')
+    route.push(`${path}?${searchParams.toString()}`)
+  }
+
+  function handleRouteEditForm() {
+    searchParams.set('type_form', 'update')
+    route.push(`/user/${params.login}/form?${searchParams.toString()}`)
   }
 
   function openModalPassword() {
@@ -102,9 +112,11 @@ export default function UserDetailProfile() {
       const user = response.data
 
       setUser(user)
-      setTimeout(() => { setStatusFetch('success') }, 200)
+      setTimeout(() => {
+        setStatusFetch('success')
+      }, 200)
     } catch (error) {
-      alert('Ops! Houve uma falha na busca dos dados')
+      Swal.fire({ title: 'Oops', icon: 'error', text: 'Houve uma falha na busca das informações' })
       setStatusFetch('error')
     }
   }
@@ -129,6 +141,7 @@ export default function UserDetailProfile() {
 
         setTimeout(() => setStatusUpdate('success'), 500)
         closeModalPassword()
+        Swal.fire({ text: 'Senha atualizada com sucesso!', icon: 'success' })
       } else {
         setStatusUpdate('none')
         setError('password', { message: 'As senhas devem ser iguais!' })
@@ -136,7 +149,12 @@ export default function UserDetailProfile() {
     } catch (error) {
       setStatusUpdate('none')
       setModalPassword(false)
-      alert('Ops! Houve uma falha na atualização da senha, tente novamente!')
+
+      Swal.fire({
+        title: 'Oops',
+        icon: 'error',
+        text: 'Houve uma falha na atualização da senha, tente novamente!'
+      })
     }
   }
 
@@ -145,8 +163,8 @@ export default function UserDetailProfile() {
   }
 
   return (
-    <section className="h-screen w-full">
-      <div className="flex w-full items-center justify-between px-5 py-2">
+    <section className="h-screen w-full flex flex-col items-center gap-5">
+      <div className="flex w-full items-center justify-between px-5 h-14 mt-2 ">
         <Navigation>
           <NavigationList>
             <NavigationItem>
@@ -209,7 +227,7 @@ export default function UserDetailProfile() {
             </DialogContent>
           </DialogWrapper>
         </Dialog>
-        <Document className="mt-2 h-[70%] w-[90%] md:h-[65%] md:w-[95%] xl:w-[75%]">
+        <Document className="h-[70%] w-[90%] md:h-[65%] md:w-[95%] xl:w-[75%]">
           <DocumentHeader>
             <DocumentTitle>{statusFetch === 'success' ? user.name : 'Carregando..'}</DocumentTitle>
             <DocumentStatus variant={user.active ? 'success' : 'error'}>
@@ -305,7 +323,7 @@ export default function UserDetailProfile() {
             <Button variant={'outline'} onClick={() => handleRoute('/user')}>
               VOLTAR
             </Button>
-            <Button variant={'default'} onClick={() => handleRoute('/form')}>
+            <Button variant={'default'} onClick={() => handleRouteEditForm()}>
               EDITAR
             </Button>
           </DocumentFooter>

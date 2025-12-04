@@ -19,21 +19,25 @@ export type PaginationTableProps = {
 }
 
 export function PaginationTable({ page, total, limit, handleLimit, handlePagination }: PaginationTableProps) {
-  const disableActions = total < limit
-
-  const { visiblePages, hiddenPages, firstHiddenPage } = useMemo(() => {
+  const { totalPages, visiblePages, hiddenPages, firstHiddenPage } = useMemo(() => {
     return getPagination({ total, limit })
   }, [total, limit])
 
+  const exceededItemLimit = total < limit
+
+  const disablePrevAction = exceededItemLimit || page <= 0
+
+  const disableNextAction = exceededItemLimit || page === totalPages - 1
+
   return (
-    <Pagination pages={Math.round(total / limit)} className="mt-1.5 gap-x-3">
+    <Pagination className="mt-1.5 gap-x-3">
       <div>
         <p className="dark:text-light">
-          {page} - {limit} de {total}
+          {page + 1} - {limit} de {total}
         </p>
       </div>
       <div>
-        <NativeSelect defaultValue={'15'} onChange={handleLimit}>
+        <NativeSelect onChange={handleLimit} value={limit}>
           <NativeSelectOption value={'15'}>15</NativeSelectOption>
           <NativeSelectOption value={'45'}>45</NativeSelectOption>
           <NativeSelectOption value={'60'}>60</NativeSelectOption>
@@ -41,28 +45,28 @@ export function PaginationTable({ page, total, limit, handleLimit, handlePaginat
         </NativeSelect>
       </div>
       <div>
-        <PaginationPrevious handlePagination={handlePagination} disabled={disableActions} />
+        <PaginationPrevious disabled={disablePrevAction} onClick={() => handlePagination((page - 1).toString())} />
       </div>
       <PaginationContent className="hidden sm:inline-flex">
-        {page <= firstHiddenPage &&
+        {page < firstHiddenPage &&
           visiblePages.map((item) => {
             return (
               <PaginationItem
+                isActive={page === item}
                 key={`page-item-${item}`}
-                value={(item + 1).toString()}
-                onClick={() => handlePagination((item + 1).toString())}
+                onClick={() => handlePagination(item.toString())}
               >
                 {item + 1}
               </PaginationItem>
             )
           })}
-        {page > firstHiddenPage &&
+        {page >= firstHiddenPage &&
           hiddenPages.map((item) => {
             return (
               <PaginationItem
+                isActive={page === item}
                 key={`page-item-${item}`}
-                value={(item + 1).toString()}
-                onClick={() => handlePagination((item + 1).toString())}
+                onClick={() => handlePagination(item.toString())}
               >
                 {item + 1}
               </PaginationItem>
@@ -70,7 +74,7 @@ export function PaginationTable({ page, total, limit, handleLimit, handlePaginat
           })}
       </PaginationContent>
       <div>
-        <PaginationNext handlePagination={handlePagination} disabled={disableActions} />
+        <PaginationNext disabled={disableNextAction} onClick={() => handlePagination((page + 1).toString())} />
       </div>
     </Pagination>
   )

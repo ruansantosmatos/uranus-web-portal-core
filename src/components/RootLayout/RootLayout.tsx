@@ -27,7 +27,7 @@ export function RootLayout({ children }: { children: React.ReactNode }) {
     <ThemeProvider storageTheme>
       <SidebarProvider>
         <URLParamsProvider>
-          <main className={'bg-foreground h-screen w-screen overflow-y-auto dark:bg-(--background)'}>
+          <main className={'bg-foreground h-screen w-screen flex flex-col dark:bg-(--background)'}>
             <div className="bg-light flex h-14 w-full shadow-md shadow-gray-500/15 dark:border-b dark:border-b-gray-100 dark:bg-(--background) dark:shadow-none">
               <div className="xl:[20%] hidden h-full w-[20%] items-center pl-5 sm:flex sm:w-[30%] md:w-[30%] lg:w-[20%]">
                 <Image src={Logo} alt={'logo_horizontal_default'} className={'w-40 object-contain'} />
@@ -64,8 +64,12 @@ export function RootLayout({ children }: { children: React.ReactNode }) {
                 </div>
               </div>
             </div>
-            <SidebarNavigation />
-            <div className="h-[92%] w-full">{children}</div>
+            <div className='h-[calc(100%-3.5rem)] flex'>
+              <SidebarNavigation />
+              <div className="flex flex-1 overflow-y-auto">
+                {children}
+              </div>
+            </div>
           </main>
         </URLParamsProvider>
       </SidebarProvider>
