@@ -1,6 +1,6 @@
 import { ConfigFetch } from '@/types'
 
-type UpdatePasswordProps = {
+export type UpdatePasswordProps = {
   login: string
   config: ConfigFetch
 }

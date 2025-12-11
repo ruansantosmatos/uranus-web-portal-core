@@ -5,7 +5,7 @@ import { ConfigFetch, ResponseFetch } from '@/types'
 export async function GetAll(config: ConfigFetch): Promise<ResponseFetch<Group[]>> {
   try {
     const { request, searchParams } = config
-    const url = `api/group${buildQueryString(searchParams)}`
+    const url = `/api/group${buildQueryString(searchParams)}`
 
     const response = await fetch(url, request)
     const data = (await response.json()) as ResponseFetch<Group[]>

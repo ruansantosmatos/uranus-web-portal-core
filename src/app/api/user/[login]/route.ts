@@ -5,3 +5,13 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   const { login } = await params
   return fetchToAPI(`/uranus/core/users/${login}`, request)
 }
+
+export async function POST(request: NextRequest, { params }: { params: Promise<{ login: string }> }) {
+  const { login } = await params
+  return fetchToAPI(`/uranus/core/users/${login}`, request)
+}
+
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ login: string }> }) {
+  const { login } = await params
+  return fetchToAPI(`/uranus/core/users/${login}`, request)
+}

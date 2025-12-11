@@ -5,11 +5,12 @@ import { KeySquare } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { useEffect, useState } from 'react'
 import { ServicesUser } from '@/services/user'
-import { ConfigFetch, StatusFetch, UpdateUserPassword } from '@/types'
-import { formatDate, getHeadersFetch } from '@/utils'
-import { useParams, useRouter } from 'next/navigation'
+import { schemaUpdatePassword } from '@/validators'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { UpdatePasswordData, UpdatePasswordSchema, UserByLogin } from '@/types'
+import { useParams, useRouter } from 'next/navigation'
+import { UpdatePasswordData, UserByLogin } from '@/types'
+import { ConfigFetch, StatusFetch, UpdateUserPassword } from '@/types'
+import { formatCPF, formatDate, formatPhone, getHeadersFetch } from '@/utils'
 import {
   Button,
   Dialog,
@@ -58,13 +59,6 @@ export default function UserDetailProfile() {
 
   const userGroups = user.groups?.map((value) => value.name).join(' / ') ?? '--'
 
-  const schemaCore: UpdatePasswordSchema = {
-    password: z.string().min(6, 'Deve possuir no mínimo 6 carcteres'),
-    newPassword: z.string().min(6, 'Deve possuir no mínimo 6 carcteres')
-  }
-
-  const schemaValidation = z.object<UpdatePasswordSchema>(schemaCore).required()
-
   const {
     reset,
     register,
@@ -73,7 +67,7 @@ export default function UserDetailProfile() {
     handleSubmit,
     formState: { errors }
   } = useForm({
-    resolver: zodResolver(schemaValidation),
+    resolver: zodResolver(schemaUpdatePassword),
     shouldFocusError: false
   })
 
@@ -82,13 +76,12 @@ export default function UserDetailProfile() {
   }, [])
 
   function handleRoute(path: string) {
-    searchParams.delete('type_form', 'update')
     route.push(`${path}?${searchParams.toString()}`)
   }
 
   function handleRouteEditForm() {
-    searchParams.set('type_form', 'update')
-    route.push(`/user/${params.login}/form?${searchParams.toString()}`)
+    const login = params.login
+    route.push(`/user/form?type_form=update&login=${login}&${searchParams.toString()}`)
   }
 
   function openModalPassword() {
@@ -116,7 +109,7 @@ export default function UserDetailProfile() {
         setStatusFetch('success')
       }, 200)
     } catch (error) {
-      Swal.fire({ title: 'Oops', icon: 'error', text: 'Houve uma falha na busca das informações' })
+      Swal.fire({ icon: 'error', text: 'Houve uma falha na busca das informações' })
       setStatusFetch('error')
     }
   }
@@ -149,12 +142,7 @@ export default function UserDetailProfile() {
     } catch (error) {
       setStatusUpdate('none')
       setModalPassword(false)
-
-      Swal.fire({
-        title: 'Oops',
-        icon: 'error',
-        text: 'Houve uma falha na atualização da senha, tente novamente!'
-      })
+      Swal.fire({ icon: 'error', text: 'Houve uma falha na atualização da senha.' })
     }
   }
 
@@ -163,8 +151,8 @@ export default function UserDetailProfile() {
   }
 
   return (
-    <section className="h-screen w-full flex flex-col items-center gap-5">
-      <div className="flex w-full items-center justify-between px-5 h-14 mt-2 ">
+    <section className="flex h-screen w-full flex-col items-center gap-5">
+      <div className="mt-2 flex h-14 w-full items-center justify-between px-5">
         <Navigation>
           <NavigationList>
             <NavigationItem>
@@ -240,7 +228,7 @@ export default function UserDetailProfile() {
               <DocumentSectionHeader>
                 <DocumentSectionTitle className="text-lg">Dados Pessoais</DocumentSectionTitle>
               </DocumentSectionHeader>
-              <DocumentSectionContent className="md:grid-cols-2 lg:grid-cols-3">
+              <DocumentSectionContent className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                 <DocumentItem>
                   <DocumentItemTitle>Nome Completo</DocumentItemTitle>
                   <CustomDocumentItem value={user.name ?? '--'} />
@@ -259,7 +247,7 @@ export default function UserDetailProfile() {
                 </DocumentItem>
                 <DocumentItem>
                   <DocumentItemTitle>Telefone Celular</DocumentItemTitle>
-                  <CustomDocumentItem value={user.phone_number ?? '--'} />
+                  <CustomDocumentItem value={user.phone_number ? formatPhone(user.phone_number) : '--'} />
                 </DocumentItem>
                 <DocumentItem>
                   <DocumentItemTitle>Login</DocumentItemTitle>
@@ -267,7 +255,7 @@ export default function UserDetailProfile() {
                 </DocumentItem>
                 <DocumentItem>
                   <DocumentItemTitle>CPF</DocumentItemTitle>
-                  <CustomDocumentItem value={user.cpf ?? '--'} />
+                  <CustomDocumentItem value={user.cpf ? formatCPF(user.cpf) : '--'} />
                 </DocumentItem>
                 <DocumentItem>
                   <DocumentItemTitle>N° de Matrícula</DocumentItemTitle>
@@ -280,7 +268,7 @@ export default function UserDetailProfile() {
               <DocumentSectionHeader>
                 <DocumentSectionTitle className="text-lg">Atribuição</DocumentSectionTitle>
               </DocumentSectionHeader>
-              <DocumentSectionContent className="md:grid-cols-2 lg:grid-cols-3">
+              <DocumentSectionContent className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                 <DocumentItem>
                   <DocumentItemTitle>Grupos</DocumentItemTitle>
                   <CustomDocumentItem value={userGroups} />
@@ -296,7 +284,7 @@ export default function UserDetailProfile() {
               <DocumentSectionHeader>
                 <DocumentSectionTitle className="text-lg">Aparelhos</DocumentSectionTitle>
               </DocumentSectionHeader>
-              <DocumentSectionContent className="md:grid-cols-2 lg:grid-cols-3">
+              <DocumentSectionContent className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                 {statusFetch !== 'success' ? (
                   <Skeleton />
                 ) : user.devices?.length === 0 ? (

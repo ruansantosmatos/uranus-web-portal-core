@@ -1,5 +1,6 @@
 'use client'
 import { useRouter } from 'next/navigation'
+import { Search, Smartphone, User } from 'lucide-react'
 import {
   Sidebar,
   Accordion,
@@ -29,21 +30,28 @@ export function SidebarNavigation() {
   }
 
   return (
-    <Sidebar className={`transition-all ease-linear duration-200 ${open ? 'md:w-72' : 'md:w-0'}`}>
+    <Sidebar>
       <SidebarContent>
         <SidebarGroupContent className="pt-10 sm:pt-8">
           <Accordion>
-            <SidebarGroup>
+            <SidebarGroup className='p-2'>
               <AccordionTrigger>
                 <SidebarGroupLabel>
-                  <SidebarButton collapseIcon>Contas</SidebarButton>
+                  <SidebarButton collapseIcon>
+                    <div className='inline-flex justify-center items-end gap-2'>
+                      <User size={22} />
+                      Contas
+                    </div>
+                  </SidebarButton>
                 </SidebarGroupLabel>
               </AccordionTrigger>
               <AccordionContent>
                 <SidebarMenu>
                   <SidebarMenuSub>
                     <SidebarMenuSubItem>
-                      <SidebarButton>Cliente</SidebarButton>
+                      <SidebarButton>
+                        Cliente
+                      </SidebarButton>
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
                       <SidebarButton onClick={() => navigation('/user')}>Usuários</SidebarButton>
@@ -60,10 +68,15 @@ export function SidebarNavigation() {
             </SidebarGroup>
           </Accordion>
           <Accordion>
-            <SidebarGroup>
+            <SidebarGroup className='p-2'>
               <AccordionTrigger>
                 <SidebarGroupLabel>
-                  <SidebarButton collapseIcon>Equipamentos</SidebarButton>
+                  <SidebarButton collapseIcon>
+                    <div className='inline-flex justify-center items-end gap-2'>
+                      <Smartphone size={20} />
+                      Equipamentos
+                    </div>
+                  </SidebarButton>
                 </SidebarGroupLabel>
               </AccordionTrigger>
               <AccordionContent>
@@ -78,10 +91,15 @@ export function SidebarNavigation() {
             </SidebarGroup>
           </Accordion>
           <Accordion>
-            <SidebarGroup>
+            <SidebarGroup className='p-2'>
               <AccordionTrigger>
                 <SidebarGroupLabel>
-                  <SidebarButton collapseIcon>Consultas</SidebarButton>
+                  <SidebarButton collapseIcon>
+                    <div className='inline-flex justify-center items-end gap-2'>
+                      <Search size={20} />
+                      Consultas
+                    </div>
+                  </SidebarButton>
                 </SidebarGroupLabel>
               </AccordionTrigger>
               <AccordionContent>

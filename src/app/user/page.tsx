@@ -1,5 +1,5 @@
 'use client'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { TableUser } from '@/components/User'
 import { ServicesUser } from '@/services/user'
 import { ServicesGroup } from '@/services/group'
@@ -97,17 +97,21 @@ export default function Users() {
 
   function handlePagination(page: string) {
     setPage(Number(page))
-    updateQueryParams({ page: page })
+    updateQueryParams({ page: page, limit })
   }
 
-  function returnSearchParams() {
-    const urlSearchParams = new URLSearchParams(window.location.search)
+  function returnFilters() {
     const params: Record<string, any> = {}
+    const sessionFilters = sessionStorage.getItem('filters')
 
-    urlSearchParams.forEach((value, key) => {
-      const transform = transformers[key]
-      params[key] = transform ? transform(value) : value
-    })
+    if (sessionFilters) {
+      const filters = JSON.parse(sessionFilters) as { name: string; value: string }[]
+
+      filters.forEach((filter) => {
+        const transform = transformers[filter.name]
+        params[filter.name] = transform ? transform(filter.value) : filter.value
+      })
+    }
 
     return params
   }
@@ -139,15 +143,18 @@ export default function Users() {
   async function useFetchUsers() {
     try {
       setStatusFetch('loading')
-      const params: Record<string, string> = returnSearchParams()
-      const paramsActive = Object.entries(params)
+      const searchParams = new URLSearchParams(window.location.search)
+      const params: Record<string, string> = returnFilters()
 
-      setPage(parseInt(params.page ?? page))
-      setLimit(parseInt(params.limit ?? limit))
+      const _page = Number(searchParams.get('page') ?? page)
+      const _limit = Number(searchParams.get('limit') ?? limit)
+
+      setPage(_page)
+      setLimit(_limit)
 
       const config: ConfigFetch = {
         request: configRequest,
-        searchParams: paramsActive.length > 0 ? params : { page, limit }
+        searchParams: { page: _page, limit: _limit, ...params }
       }
 
       const response = await ServicesUser.GetAll(config)
@@ -179,7 +186,7 @@ export default function Users() {
           </NavigationList>
         </Navigation>
         <div>
-          <Button>
+          <Button onClick={() => handleRoute('/user/form?type_form=create')}>
             <UserPlus2Icon size={20} />
             <span className="sr-only sm:not-sr-only">NOVO USUÁRIO</span>
           </Button>
@@ -242,7 +249,7 @@ export default function Users() {
           </FilterWrapper>
         </Filter>
       </div>
-      <div className="w-full px-4 mt-3">
+      <div className="mt-3 w-full px-4">
         <TableUser users={users} limit={limit} statusFetch={statusFetch} />
         <PaginationTable
           page={page}
